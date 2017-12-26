@@ -1,0 +1,80 @@
+# Hexo Configuration
+## Docs: https://hexo.io/docs/configuration.html
+## Source: https://github.com/hexojs/hexo/
+
+# Site
+title: Little Grass
+subtitle: 坚定信念，有追求，专注成果为导向，树立目标，坚持不懈，勇敢，乐观面对工作和生活中的困难和挑战，拒绝抱怨，拒绝懒惰拖延，平庸的人总是抱怨自己不懂的事情。不懊悔过去和幻想未来，实践中总结，树立责任感和责任心，实现自我成长！
+description: 学习总结 思考感悟 知识管理 WEB前端博客
+author: Little Grass
+email: 208567306@qq.com
+language: zh-CN
+timezone:
+
+# URL
+## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
+url: http://smile-leaf-language.github.io/
+root: /
+permalink: :year/:month/:day/:title/
+permalink_defaults:
+
+# Directory
+source_dir: source
+public_dir: public
+tag_dir: tags
+archive_dir: archives
+category_dir: categories
+code_dir: downloads/code
+i18n_dir: :lang
+skip_render:
+
+# Writing
+new_post_name: :title.md # File name of new posts
+default_layout: post
+titlecase: false # Transform title into titlecase
+external_link: true # Open external links in new tab
+filename_case: 0
+render_drafts: false
+post_asset_folder: true
+relative_link: false
+future: true
+highlight:
+  enable: true
+  line_number: true
+  auto_detect: true
+  tab_replace:
+
+# Category & Tag
+default_category: uncategorized
+category_map:
+tag_map:
+
+# Date / Time format
+## Hexo uses Moment.js to parse and display date
+## You can customize the date format as defined in
+## http://momentjs.com/docs/#/displaying/format/
+date_format: YYYY-MM-DD
+time_format: HH:mm:ss
+
+# Pagination
+## Set per_page to 0 to disable pagination
+per_page: 10
+pagination_dir: page
+
+# Extensions
+## Plugins: https://hexo.io/plugins/
+## Themes: https://hexo.io/themes/
+theme: spfk
+
+# 自动生成sitemap
+# sitemap:
+# path: sitemap.xml
+# baidusitemap:
+# path: baidusitemap.xml
+
+# Deployment
+## Docs: https://hexo.io/docs/deployment.html
+deploy:
+  type: git
+  repo: git@github.com:smile-leaf-language/smile-leaf-language.github.io.git
+  branch: master
