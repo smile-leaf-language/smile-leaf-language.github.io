@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>zepto的tap事件点透分析 | leaf</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="移动端WEB开发中，click 和 tap两者都会在点击时触发，但是click会有 200~300 ms，所以请用tap代替click作为点击事件。但是在使用zepto框架的tap来模拟移动设备浏览器内的点击事件，来规避click事件的延迟响应时，有可能出现点透的情况，即点击会触发非当前层的点击事件。 zepto的tap事件点透问题分析：一、“点透”是什么你可能碰到过在列表页面上创建一个弹出层，弹">
+<meta name="keywords" content="zepto的tap事件点透">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zepto的tap事件点透分析">
+<meta property="og:url" content="http://smile-leaf-language.github.io/2016/02/02/zepto-tap/index.html">
+<meta property="og:site_name" content="leaf">
+<meta property="og:description" content="移动端WEB开发中，click 和 tap两者都会在点击时触发，但是click会有 200~300 ms，所以请用tap代替click作为点击事件。但是在使用zepto框架的tap来模拟移动设备浏览器内的点击事件，来规避click事件的延迟响应时，有可能出现点透的情况，即点击会触发非当前层的点击事件。 zepto的tap事件点透问题分析：一、“点透”是什么你可能碰到过在列表页面上创建一个弹出层，弹">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://smile-leaf-language.github.io/images/tap.png">
+<meta property="og:updated_time" content="2016-12-28T05:27:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="zepto的tap事件点透分析">
+<meta name="twitter:description" content="移动端WEB开发中，click 和 tap两者都会在点击时触发，但是click会有 200~300 ms，所以请用tap代替click作为点击事件。但是在使用zepto框架的tap来模拟移动设备浏览器内的点击事件，来规避click事件的延迟响应时，有可能出现点透的情况，即点击会触发非当前层的点击事件。 zepto的tap事件点透问题分析：一、“点透”是什么你可能碰到过在列表页面上创建一个弹出层，弹">
+<meta name="twitter:image" content="http://smile-leaf-language.github.io/images/tap.png">
+  
+    <link rel="alternative" href="/atom.xml" title="leaf" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/favicon.png">
+  
+  
+  <link rel="stylesheet" href="//cdn.bootcss.com/animate.css/3.5.0/animate.min.css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/font-awesome/css/font-awesome.min.css">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  
+  
+      <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  
+  <!-- 加载特效 -->
+    <script src="/js/pace.js"></script>
+    <link href="/css/pace/pace-theme-flash.css" rel="stylesheet" />
+  <script>
+      var yiliaConfig = {
+          fancybox: true,
+          animate: true,
+          isHome: false,
+          isPost: true,
+          isArchive: false,
+          isTag: false,
+          isCategory: false,
+          open_in_new: false
+      }
+  </script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+    <header id="header" class="inner">
+        <a href="/" class="profilepic">
+            
+            <img lazy-src="/img/head1.jpg" class="js-avatar">
+            
+        </a>
+
+        <hgroup>
+          <h1 class="header-author"><a href="/">leaf</a></h1>
+        </hgroup>
+
+        
+        <p class="header-subtitle">坚定信念，以结果为导向，树立目标，坚持不懈，勇敢，乐观面对工作和生活中的困难和挑战，实现自我成长！</p>
+        
+        
+            <form>
+                <input type="text" class="st-default-search-input search" id="search" placeholder=" Search...">
+            </form>
+        
+        
+            <div id="switch-btn" class="switch-btn">
+                <div class="icon">
+                    <div class="icon-ctn">
+                        <div class="icon-wrap icon-house" data-idx="0">
+                            <div class="birdhouse"></div>
+                            <div class="birdhouse_holes"></div>
+                        </div>
+                        <div class="icon-wrap icon-ribbon hide" data-idx="1">
+                            <div class="ribbon"></div>
+                        </div>
+                        
+                        <div class="icon-wrap icon-link hide" data-idx="2">
+                            <div class="loopback_l"></div>
+                            <div class="loopback_r"></div>
+                        </div>
+                        
+                        
+                        <div class="icon-wrap icon-me hide" data-idx="3">
+                            <div class="user"></div>
+                            <div class="shoulder"></div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+                <div class="tips-box hide">
+                    <div class="tips-arrow"></div>
+                    <ul class="tips-inner">
+                        <li>菜单</li>
+                        <li>标签</li>
+                        
+                        <li>友情链接</li>
+                        
+                        
+                        <li>关于我</li>
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div id="switch-area" class="switch-area">
+            <div class="switch-wrap">
+                <section class="switch-part switch-part1">
+                    <nav class="header-menu">
+                        <ul>
+                        
+                            <li><a href="/">博客首页</a></li>
+                        
+                            <li><a href="/works">作品展示</a></li>
+                        
+                            <li><a href="/about">留言打卡</a></li>
+                        
+                            <li><a href="/FrontEndGuide">前端导航</a></li>
+                        
+                        </ul>
+                    </nav>
+                    <nav class="header-nav">
+                        <ul class="social">
+                            
+                                <a class="fl mail" target="_blank" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=0eLj6enj5Ofp4eiRoKD-sr68" title="mail">mail</a>
+                            
+                                <a class="fl github" target="_blank" href="https://github.com/smile-leaf-language" title="github">github</a>
+                            
+                                <a class="fl zhihu" target="_blank" href="https://www.zhihu.com/people/xiao-gao-31-68" title="zhihu">zhihu</a>
+                            
+                                <a class="fl weibo" target="_blank" href="http://weibo.com/smileLeafLanguage" title="weibo">weibo</a>
+                            
+                                <a class="fl google" target="_blank" href="http://www.cnblogs.com/gyjWEB/" title="google">google</a>
+                            
+                                <a class="fl twitter" target="_blank" href="http://www.cnblogs.com/gyjWEB/" title="twitter">twitter</a>
+                            
+                                <a class="fl facebook" target="_blank" href="#" title="facebook">facebook</a>
+                            
+                                <a class="fl rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                            
+                        </ul>
+                    </nav>
+                </section>
+                
+                
+                <section class="switch-part switch-part2">
+                    <div class="widget tagcloud" id="js-tagcloud">
+                        <a href="/tags/Ajax/" style="font-size: 12.5px;">Ajax</a> <a href="/tags/CDN/" style="font-size: 10px;">CDN</a> <a href="/tags/CSS/" style="font-size: 15px;">CSS</a> <a href="/tags/CSS3/" style="font-size: 12.5px;">CSS3</a> <a href="/tags/Chrome/" style="font-size: 12.5px;">Chrome</a> <a href="/tags/Front-end-outline/" style="font-size: 10px;">Front end outline</a> <a href="/tags/FrontPlan/" style="font-size: 10px;">FrontPlan</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/HTML/" style="font-size: 17.5px;">HTML</a> <a href="/tags/Hexo/" style="font-size: 20px;">Hexo</a> <a href="/tags/JS实现继承的几种方式/" style="font-size: 10px;">JS实现继承的几种方式</a> <a href="/tags/JavaScript/" style="font-size: 15px;">JavaScript</a> <a href="/tags/Markdown/" style="font-size: 10px;">Markdown</a> <a href="/tags/Mobile/" style="font-size: 12.5px;">Mobile</a> <a href="/tags/NodeJs/" style="font-size: 10px;">NodeJs</a> <a href="/tags/Sublime/" style="font-size: 12.5px;">Sublime</a> <a href="/tags/automation/" style="font-size: 10px;">automation</a> <a href="/tags/js-二叉树遍历/" style="font-size: 10px;">js 二叉树遍历</a> <a href="/tags/node-fs-mkdir/" style="font-size: 10px;">node fs.mkdir</a> <a href="/tags/node-js字符编码函数/" style="font-size: 10px;">node js字符编码函数</a> <a href="/tags/rem/" style="font-size: 10px;">rem</a> <a href="/tags/setTimeout详解/" style="font-size: 10px;">setTimeout详解</a> <a href="/tags/sublime/" style="font-size: 10px;">sublime</a> <a href="/tags/window-7/" style="font-size: 10px;">window 7</a> <a href="/tags/zepto的tap事件点透/" style="font-size: 10px;">zepto的tap事件点透</a> <a href="/tags/【转载】七个对我最重要的职业建议（译文）/" style="font-size: 10px;">【转载】七个对我最重要的职业建议（译文）</a> <a href="/tags/微信/" style="font-size: 10px;">微信</a> <a href="/tags/［译］Node-js-框架比较-Express-vs-Koa-vs-Hapi/" style="font-size: 10px;">［译］Node.js 框架比较( Express vs. Koa vs. Hapi )</a>
+                    </div>
+                </section>
+                
+                
+                
+                <section class="switch-part switch-part3">
+                    <div id="js-friends">
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://MOxFIVE.github.io/">MOxFIVE</a>
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.vsay.cn/">DoubleV</a>
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.ccwebsite.com/">兮兮</a>
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://blog.dandyweng.com/">翁天信</a>
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.plqblog.com/views/index.php">潘利强</a>
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.hankin.cn/">hankin</a>
+                    
+                      <a target="_blank" class="main-nav-link switch-friends-link" href="http://blog.waydrow.com/">waydrow</a>
+                    
+                    </div>
+                </section>
+                
+
+                
+                
+                <section class="switch-part switch-part4">
+                
+                    <div id="js-aboutme">纯海迷、爱运动、爱交友、爱旅行、喜欢接触新鲜事物、迎接新的挑战，更爱游离于错综复杂的编码与逻辑中</div>
+                </section>
+                
+            </div>
+        </div>
+    </header>                
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+      <div class="overlay">
+          <div class="slider-trigger"></div>
+          <h1 class="header-author js-mobile-header hide"><a href="/" title="回到主页">leaf</a></h1>
+      </div>
+    <div class="intrude-less">
+        <header id="header" class="inner">
+            <a href="/" class="profilepic">
+                
+                    <img lazy-src="/img/head1.jpg" class="js-avatar">
+                
+            </a>
+            <hgroup>
+              <h1 class="header-author"><a href="/" title="回到主页">leaf</a></h1>
+            </hgroup>
+            
+            <p class="header-subtitle">坚定信念，以结果为导向，树立目标，坚持不懈，勇敢，乐观面对工作和生活中的困难和挑战，实现自我成长！</p>
+            
+            <nav class="header-menu">
+                <ul>
+                
+                    <li><a href="/">博客首页</a></li>
+                
+                    <li><a href="/works">作品展示</a></li>
+                
+                    <li><a href="/about">留言打卡</a></li>
+                
+                    <li><a href="/FrontEndGuide">前端导航</a></li>
+                
+                <div class="clearfix"></div>
+                </ul>
+            </nav>
+            <nav class="header-nav">
+                <div class="social">
+                    
+                        <a class="mail" target="_blank" href="http://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=0eLj6enj5Ofp4eiRoKD-sr68" title="mail">mail</a>
+                    
+                        <a class="github" target="_blank" href="https://github.com/smile-leaf-language" title="github">github</a>
+                    
+                        <a class="zhihu" target="_blank" href="https://www.zhihu.com/people/xiao-gao-31-68" title="zhihu">zhihu</a>
+                    
+                        <a class="weibo" target="_blank" href="http://weibo.com/smileLeafLanguage" title="weibo">weibo</a>
+                    
+                        <a class="google" target="_blank" href="http://www.cnblogs.com/gyjWEB/" title="google">google</a>
+                    
+                        <a class="twitter" target="_blank" href="http://www.cnblogs.com/gyjWEB/" title="twitter">twitter</a>
+                    
+                        <a class="facebook" target="_blank" href="#" title="facebook">facebook</a>
+                    
+                        <a class="rss" target="_blank" href="/atom.xml" title="rss">rss</a>
+                    
+                </div>
+            </nav>
+        </header>                
+    </div>
+</nav>
+      <div class="body-wrap"><article id="post-zepto-tap" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/02/02/zepto-tap/" class="article-date">
+      <time datetime="2016-02-02T10:11:20.000Z" itemprop="datePublished">2016-02-02</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      zepto的tap事件点透分析
+    </h1>
+  
+
+      </header>
+      
+      <div class="article-info article-info-post">
+        
+    <div class="article-category tagcloud">
+    <a class="article-category-link" href="/categories/zepto的tap事件点透/">zepto的tap事件点透</a>
+    </div>
+
+
+        
+    <div class="article-tag tagcloud">
+        <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zepto的tap事件点透/">zepto的tap事件点透</a></li></ul>
+    </div>
+
+        <div class="clearfix"></div>
+      </div>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+          
+        <p>移动端WEB开发中，click 和 tap两者都会在点击时触发，但是click会有 200~300 ms，所以请用tap代替click作为点击事件。但是在使用zepto框架的tap来模拟移动设备浏览器内的点击事件，来规避click事件的延迟响应时，有可能出现点透的情况，即点击会触发非当前层的点击事件。</p>
+<h3 id="zepto的tap事件点透问题分析："><a href="#zepto的tap事件点透问题分析：" class="headerlink" title="zepto的tap事件点透问题分析："></a>zepto的tap事件点透问题分析：</h3><h4 id="一、“点透”是什么"><a href="#一、“点透”是什么" class="headerlink" title="一、“点透”是什么"></a>一、“点透”是什么</h4><p>你可能碰到过在列表页面上创建一个弹出层，弹出层有个关闭的按钮，你点了这个按钮关闭弹出层后后，这个按钮正下方的内容也会执行点击事件（或打开链接）。这个被定义为这是一个“点透”现象。</p>
+<p>比如在项目中遇到了如下图的问题：在点击弹出来的选择组件的右上角完成后会让完成后面的input输入框聚焦，弹出输入键盘，也就是点透了。</p>
+<p><img src="/images/tap.png" alt="tapPoint"></p>
+<h4 id="二、为什么会出现点透呢？"><a href="#二、为什么会出现点透呢？" class="headerlink" title="二、为什么会出现点透呢？"></a>二、为什么会出现点透呢？</h4><p>这个需要从zepto(或者jqm)源码里面看关于tap的实现方法：</p>
+<figure class="highlight irpf90"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">$(document).ready(<span class="function"><span class="keyword">function</span><span class="params">()</span></span>&#123;</span><br><span class="line">     var now, delta, deltaX = <span class="number">0</span>, deltaY = <span class="number">0</span>, firstTouch, _isPointerType</span><br><span class="line"> </span><br><span class="line">     <span class="keyword">if</span> (‘MSGesture‘ <span class="keyword">in</span> window) &#123;</span><br><span class="line">       gesture = new MSGesture()</span><br><span class="line">       gesture.<span class="keyword">target</span> = document.body</span><br><span class="line">     &#125;</span><br><span class="line"> </span><br><span class="line">     $(document)</span><br><span class="line">      .<span class="keyword">bind</span>(‘MSGestureEnd‘, <span class="function"><span class="keyword">function</span><span class="params">(e)</span></span>&#123;</span><br><span class="line">        var swipeDirectionFromVelocity =</span><br><span class="line">          e.velocityX &gt; <span class="number">1</span> ? ‘Right‘ : e.velocityX &lt; -<span class="number">1</span> ? ‘Left‘ : e.velocityY &gt; <span class="number">1</span> ? ‘Down‘ : e.velocityY &lt; -<span class="number">1</span> ? ‘Up‘ : null;</span><br><span class="line">        <span class="keyword">if</span> (swipeDirectionFromVelocity) &#123;</span><br><span class="line">          <span class="keyword">touch</span>.el.trigger(‘swipe‘)</span><br><span class="line">          <span class="keyword">touch</span>.el.trigger(‘swipe‘+ swipeDirectionFromVelocity)</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;)</span><br><span class="line">      .on(‘touchstart MSPointerDown pointerdown‘, <span class="function"><span class="keyword">function</span><span class="params">(e)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>((_isPointerType = isPointerEventType(e, ‘down‘)) &amp;&amp;</span><br><span class="line">          <span class="comment">!isPrimaryTouch(e)) return</span></span><br><span class="line">        firstTouch = _isPointerType ? e : e.touches[<span class="number">0</span>]</span><br><span class="line">        <span class="keyword">if</span> (e.touches &amp;&amp; e.touches.length === <span class="number">1</span> &amp;&amp; <span class="keyword">touch</span>.x2) &#123;</span><br><span class="line">          // Clear <span class="keyword">out</span> <span class="keyword">touch</span> movement <span class="keyword">data</span> <span class="keyword">if</span> we have it sticking around</span><br><span class="line">          // This can occur <span class="keyword">if</span> touchcancel doesn‘t fire due to preventDefault, etc.</span><br><span class="line">          <span class="keyword">touch</span>.x2 = undefined</span><br><span class="line">          <span class="keyword">touch</span>.y2 = undefined</span><br><span class="line">        &#125;</span><br><span class="line">        now = Date.now()</span><br><span class="line">        delta = now - (<span class="keyword">touch</span>.last || now)</span><br><span class="line">        <span class="keyword">touch</span>.el = $(‘tagName‘ <span class="keyword">in</span> firstTouch.<span class="keyword">target</span> ?</span><br><span class="line">          firstTouch.<span class="keyword">target</span> : firstTouch.<span class="keyword">target</span>.parentNode)</span><br><span class="line">        touchTimeout &amp;&amp; clearTimeout(touchTimeout)</span><br><span class="line">        <span class="keyword">touch</span>.x1 = firstTouch.pageX</span><br><span class="line">        <span class="keyword">touch</span>.y1 = firstTouch.pageY</span><br><span class="line">        <span class="keyword">if</span> (delta &gt; <span class="number">0</span> &amp;&amp; delta &lt;= <span class="number">250</span>) <span class="keyword">touch</span>.isDoubleTap = true</span><br><span class="line">        <span class="keyword">touch</span>.last = now</span><br><span class="line">        longTapTimeout = setTimeout(longTap, longTapDelay)</span><br><span class="line">        // adds the current <span class="keyword">touch</span> contact for IE gesture recognition</span><br><span class="line">        <span class="keyword">if</span> (gesture &amp;&amp; _isPointerType) gesture.addPointer(e.pointerId);</span><br><span class="line">      &#125;)</span><br><span class="line">      .on(‘touchmove MSPointerMove pointermove‘, <span class="function"><span class="keyword">function</span><span class="params">(e)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>((_isPointerType = isPointerEventType(e, ‘move‘)) &amp;&amp;</span><br><span class="line">          <span class="comment">!isPrimaryTouch(e)) return</span></span><br><span class="line">        firstTouch = _isPointerType ? e : e.touches[<span class="number">0</span>]</span><br><span class="line">        cancelLongTap()</span><br><span class="line">        <span class="keyword">touch</span>.x2 = firstTouch.pageX</span><br><span class="line">        <span class="keyword">touch</span>.y2 = firstTouch.pageY</span><br><span class="line"></span><br><span class="line">        deltaX += Math.<span class="built_in">abs</span>(<span class="keyword">touch</span>.x1 - <span class="keyword">touch</span>.x2)</span><br><span class="line">        deltaY += Math.<span class="built_in">abs</span>(<span class="keyword">touch</span>.y1 - <span class="keyword">touch</span>.y2)</span><br><span class="line">      &#125;)</span><br><span class="line">      .on(‘touchend MSPointerUp pointerup‘, <span class="function"><span class="keyword">function</span><span class="params">(e)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>((_isPointerType = isPointerEventType(e, ‘up‘)) &amp;&amp;</span><br><span class="line">          <span class="comment">!isPrimaryTouch(e)) return</span></span><br><span class="line">        cancelLongTap()</span><br><span class="line"></span><br><span class="line">        // swipe</span><br><span class="line">        <span class="keyword">if</span> ((<span class="keyword">touch</span>.x2 &amp;&amp; Math.<span class="built_in">abs</span>(<span class="keyword">touch</span>.x1 - <span class="keyword">touch</span>.x2) &gt; <span class="number">30</span>) ||</span><br><span class="line">            (<span class="keyword">touch</span>.y2 &amp;&amp; Math.<span class="built_in">abs</span>(<span class="keyword">touch</span>.y1 - <span class="keyword">touch</span>.y2) &gt; <span class="number">30</span>))</span><br><span class="line"></span><br><span class="line">          swipeTimeout = setTimeout(<span class="function"><span class="keyword">function</span><span class="params">()</span></span> &#123;</span><br><span class="line">            <span class="keyword">touch</span>.el.trigger(‘swipe‘)</span><br><span class="line">            <span class="keyword">touch</span>.el.trigger(‘swipe‘ + (swipeDirection(<span class="keyword">touch</span>.x1, <span class="keyword">touch</span>.x2, <span class="keyword">touch</span>.y1, <span class="keyword">touch</span>.y2)))</span><br><span class="line">            <span class="keyword">touch</span> = &#123;&#125;</span><br><span class="line">          &#125;, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">        // normal tap</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (‘last‘ <span class="keyword">in</span> <span class="keyword">touch</span>)</span><br><span class="line">          // don‘t fire tap when delta <span class="keyword">position</span> changed by more than <span class="number">30</span> pixels,</span><br><span class="line">          // for instance when moving to a point and back to origin</span><br><span class="line">          <span class="keyword">if</span> (deltaX &lt; <span class="number">30</span> &amp;&amp; deltaY &lt; <span class="number">30</span>) &#123;</span><br><span class="line">            // delay by one tick so we can cancel the ‘tap‘ event <span class="keyword">if</span> ‘scroll‘ fires</span><br><span class="line">            // (‘tap‘ fires before ‘scroll‘)</span><br><span class="line">            tapTimeout = setTimeout(<span class="function"><span class="keyword">function</span><span class="params">()</span></span> &#123;</span><br><span class="line"></span><br><span class="line">              // trigger universal ‘tap‘ with the option to cancelTouch()</span><br><span class="line">              // (cancelTouch cancels processing of single vs <span class="keyword">double</span> taps for faster ‘tap‘ response)</span><br><span class="line">              var event = $.Event(‘tap‘)</span><br><span class="line">              event.cancelTouch = cancelAll</span><br><span class="line">              <span class="keyword">touch</span>.el.trigger(event)</span><br><span class="line"></span><br><span class="line">              // trigger <span class="keyword">double</span> tap immediately</span><br><span class="line">              <span class="keyword">if</span> (<span class="keyword">touch</span>.isDoubleTap) &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="keyword">touch</span>.el) <span class="keyword">touch</span>.el.trigger(‘doubleTap‘)</span><br><span class="line">                <span class="keyword">touch</span> = &#123;&#125;</span><br><span class="line">              &#125;</span><br><span class="line"></span><br><span class="line">              // trigger single tap after 50ms of inactivity</span><br><span class="line">              <span class="keyword">else</span> &#123;</span><br><span class="line">                touchTimeout = setTimeout(<span class="function"><span class="keyword">function</span><span class="params">()</span></span>&#123;</span><br><span class="line">                  touchTimeout = null</span><br><span class="line">                  <span class="keyword">if</span> (<span class="keyword">touch</span>.el) <span class="keyword">touch</span>.el.trigger(‘singleTap‘)</span><br><span class="line">                  <span class="keyword">touch</span> = &#123;&#125;</span><br><span class="line">                &#125;, <span class="number">250</span>)</span><br><span class="line">              &#125;</span><br><span class="line">            &#125;, <span class="number">0</span>)</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">touch</span> = &#123;&#125;</span><br><span class="line">          &#125;</span><br><span class="line">         deltaX = deltaY = <span class="number">0</span></span><br><span class="line"> </span><br><span class="line">     &#125;)</span><br><span class="line">     // when the browser window loses focus,</span><br><span class="line">     // for example when a modal dialog is shown,</span><br><span class="line">     // cancel <span class="built_in">all</span> ongoing events</span><br><span class="line">     .on(‘touchcancel MSPointerCancel pointercancel‘, cancelAll)</span><br><span class="line"> </span><br><span class="line">   // scrolling the window indicates intention of the user</span><br><span class="line">   // to scroll, not tap or swipe, so cancel <span class="built_in">all</span> ongoing events</span><br><span class="line">   $(window).on(‘scroll‘, cancelAll)</span><br><span class="line"> &#125;)</span><br><span class="line"> </span><br><span class="line"> ;[‘swipe‘, ‘swipeLeft‘, ‘swipeRight‘, ‘swipeUp‘, ‘swipeDown‘,</span><br><span class="line">   ‘doubleTap‘, ‘tap‘, ‘singleTap‘, ‘longTap‘].forEach(<span class="function"><span class="keyword">function</span><span class="params">(eventName)</span></span>&#123;</span><br><span class="line">   $.fn[eventName] = <span class="function"><span class="keyword">function</span><span class="params">(callback)</span></span>&#123; <span class="keyword">return</span> this.on(eventName, callback) &#125;</span><br><span class="line"> &#125;)</span><br></pre></td></tr></table></figure>
+<p>1、可以看出zepto的tap通过兼听绑定在document上的touch事件来完成tap事件的模拟的,及tap事件是冒泡到document上触发的<br>2、再点击完成时的tap事件(touchstart\touchend)需要冒泡到document上才会触发，而在冒泡到document之前，用户手的接触屏幕(touchstart)和离开屏幕(touchend)是会触发click事件的,因为click事件有延迟触发(这就是为什么移动端不用click而用tap的原因)(大概是300ms,为了实现safari的双击事件的设计)，所以在执行完tap事件之后，弹出来的选择组件马上就隐藏了，此时click事件还在延迟的300ms之中，当300ms到来的时候，click到的其实不是完成而是隐藏之后的下方的元素，如果正下方的元素绑定的有click事件此时便会触发，如果没有绑定click事件的话就当没click，但是正下方的是input输入框(或者select选择框或者单选复选框)，点击默认聚焦而弹出输入键盘，也就出现了上面的点透现象。</p>
+<h4 id="三、zepto方案tap事件的问题？"><a href="#三、zepto方案tap事件的问题？" class="headerlink" title="三、zepto方案tap事件的问题？"></a>三、zepto方案tap事件的问题？</h4><p>1、因为js标准本不支持tap事件，所以zepto tap是touchstart与touchend模拟而出<br>2、zepto在初始化时便给document绑定touch事件，在我们点击时根据event参数获得当前元素，并会保存点下和离开时候的鼠标位置<br>3、根据当前元素鼠标移动范围判断是否为类点击事件，如果是便触发已经注册好的tap事件<br>4、zepto的代码里面有个settimeout，因为settimeout会将优先级降低（相见setTimeout详解），有了定时器，当代码执行到setTimeout的时候， 就会把这个代码放到JS的引擎的最后面，这就是为什么一旦加入settimeout，e.preventDefault便不会生效</p>
+<h3 id="点透的解决方法："><a href="#点透的解决方法：" class="headerlink" title="点透的解决方法："></a>点透的解决方法：</h3><h4 id="方案一：来得很直接github上有个fastclick可以完美解决https-github-com-ftlabs-fastclick"><a href="#方案一：来得很直接github上有个fastclick可以完美解决https-github-com-ftlabs-fastclick" class="headerlink" title="方案一：来得很直接github上有个fastclick可以完美解决https://github.com/ftlabs/fastclick"></a>方案一：来得很直接github上有个fastclick可以完美解决<a href="https://github.com/ftlabs/fastclick" target="_blank" rel="noopener">https://github.com/ftlabs/fastclick</a></h4><p>引入fastclick.js，因为fastclick源码不依赖其他库所以你可以在原生的js前直接加上</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">1 </span><span class="keyword">window</span>.addEventListener( <span class="string">"load"</span>, function() &#123;</span><br><span class="line"><span class="symbol">2 </span>    FastClick.attach( document.body );</span><br><span class="line"><span class="symbol">3 </span>&#125;, false );</span><br></pre></td></tr></table></figure>
+<p>或者有zepto或者jqm的js里面加上</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">1 </span>$(function() &#123;</span><br><span class="line"><span class="symbol">2 </span>    FastClick.attach(document.body);</span><br><span class="line"><span class="symbol">3 </span>&#125;);</span><br></pre></td></tr></table></figure>
+<p>当然require的话就这样：</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">1 </span>var FastClick = require(‘fastclick‘);</span><br><span class="line"><span class="symbol">2 </span>FastClick.attach(document.body, options);</span><br></pre></td></tr></table></figure>
+<h4 id="方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault"><a href="#方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault" class="headerlink" title="方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault()"></a>方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault()</h4><figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">1 </span>$(<span class="string">"#cbFinish"</span>).<span class="keyword">on</span>(<span class="string">"touchend"</span>, function (event) &#123;</span><br><span class="line"><span class="symbol">2 </span>    //很多处理比如隐藏什么的</span><br><span class="line"><span class="symbol">3 </span>    event.preventDefault();</span><br><span class="line"><span class="symbol">4 </span>&#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="方案三：延迟一定的时间-300ms-来处理事件"><a href="#方案三：延迟一定的时间-300ms-来处理事件" class="headerlink" title="方案三：延迟一定的时间(300ms+)来处理事件"></a>方案三：延迟一定的时间(300ms+)来处理事件</h4><figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">1 </span>$(<span class="string">"#cbFinish"</span>).<span class="keyword">on</span>(<span class="string">"tap"</span>, function (event) &#123;</span><br><span class="line"><span class="symbol">2 </span>    setTimeout(function()&#123;</span><br><span class="line"><span class="symbol">3 </span>    //很多处理比如隐藏什么的</span><br><span class="line"><span class="symbol">4 </span>    &#125;,<span class="number">320</span>);</span><br><span class="line"><span class="symbol">5 </span>&#125;);</span><br></pre></td></tr></table></figure>
+<p>这种方法其实很好，可以和fadeInIn/fadeOut等动画结合使用，可以做出过度效果</p>
+<p>理论上上面的方法可以完美的解决tap的点透问题，如果真的倔强到不行，用click</p>
+
+      
+    </div>
+    
+  </div>
+  
+    
+    <div class="copyright">
+        <p><span>本文标题:</span><a href="/2016/02/02/zepto-tap/">zepto的tap事件点透分析</a></p>
+        <p><span>文章作者:</span><a href="/" title="访问 leaf 的个人博客">leaf</a></p>
+        <p><span>发布时间:</span>2016年02月02日 - 18时11分</p>
+        <p><span>最后更新:</span>2016年12月28日 - 13时27分</p>
+        <p>
+            <span>原始链接:</span><a class="post-url" href="/2016/02/02/zepto-tap/" title="zepto的tap事件点透分析">http://smile-leaf-language.github.io/2016/02/02/zepto-tap/</a>
+            <span class="copy-path" data-clipboard-text="原文: http://smile-leaf-language.github.io/2016/02/02/zepto-tap/　　作者: leaf" title="点击复制文章链接"><i class="fa fa-clipboard"></i></span>
+            <script src="/js/clipboard.min.js"></script>
+            <script> var clipboard = new Clipboard('.copy-path'); </script>
+        </p>
+        <p>
+            <span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" title="中国大陆 (CC BY-NC-SA 3.0 CN)" target = "_blank">"署名-非商用-相同方式共享 3.0"</a> 转载请保留原文链接及作者。
+        </p>
+    </div>
+
+
+
+<nav id="article-nav">
+  
+    <a href="/2016/05/13/mkdirs/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          nodejs递归创建多层目录
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/01/28/setTimeout/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">setTimeout详解</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+    <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#zepto的tap事件点透问题分析："><span class="toc-number">1.</span> <span class="toc-text">zepto的tap事件点透问题分析：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#一、“点透”是什么"><span class="toc-number">1.1.</span> <span class="toc-text">一、“点透”是什么</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#二、为什么会出现点透呢？"><span class="toc-number">1.2.</span> <span class="toc-text">二、为什么会出现点透呢？</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#三、zepto方案tap事件的问题？"><span class="toc-number">1.3.</span> <span class="toc-text">三、zepto方案tap事件的问题？</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#点透的解决方法："><span class="toc-number">2.</span> <span class="toc-text">点透的解决方法：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#方案一：来得很直接github上有个fastclick可以完美解决https-github-com-ftlabs-fastclick"><span class="toc-number">2.1.</span> <span class="toc-text">方案一：来得很直接github上有个fastclick可以完美解决https://github.com/ftlabs/fastclick</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault"><span class="toc-number">2.2.</span> <span class="toc-text">方案二：用touchend代替tap事件并阻止掉touchend的默认行为preventDefault()</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#方案三：延迟一定的时间-300ms-来处理事件"><span class="toc-number">2.3.</span> <span class="toc-text">方案三：延迟一定的时间(300ms+)来处理事件</span></a></li></ol></li></ol>
+</div>
+<input type="button" id="tocButton" value="隐藏目录"  title="点击按钮隐藏或者显示文章目录">
+
+<script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+<script>
+    var valueHide = "隐藏目录";
+    var valueShow = "显示目录";
+
+    if ($(".left-col").is(":hidden")) {
+        $("#tocButton").attr("value", valueShow);
+    }
+    $("#tocButton").click(function() {
+        if ($("#toc").is(":hidden")) {
+            $("#tocButton").attr("value", valueHide);
+            $("#toc").slideDown(320);
+        }
+        else {
+            $("#tocButton").attr("value", valueShow);
+            $("#toc").slideUp(350);
+        }
+    })
+    if ($(".toc").length < 1) {
+        $("#toc, #tocButton").hide();
+    }
+</script>
+
+
+
+
+
+<div class="bdsharebuttonbox">
+	<a href="#" class="fx fa-weibo bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+	<a href="#" class="fx fa-weixin bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+	<a href="#" class="fx fa-qq bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+	<a href="#" class="fx fa-facebook-official bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+	<a href="#" class="fx fa-twitter bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+	<a href="#" class="fx fa-linkedin bds_linkedin" data-cmd="linkedin" title="分享到linkedin"></a>
+	<a href="#" class="fx fa-files-o bds_copy" data-cmd="copy" title="分享到复制网址"></a>
+</div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"2","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+
+
+
+
+    
+      <div class="duoshuo" id="comments">
+    <!-- 多说评论框 start -->
+    <div class="ds-thread" data-thread-key="2016/02/02/zepto-tap/" data-title="zepto的tap事件点透分析" data-url="http://smile-leaf-language.github.io/2016/02/02/zepto-tap/"></div>
+    <!-- 多说评论框 end -->
+    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+    <script type="text/javascript">
+    var duoshuoQuery = {short_name:"smile-leaf-language"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = '/js/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+    <!-- 多说公共JS代码 end -->
+</div>
+
+    
+
+
+
+    <div class="scroll" id="post-nav-button">
+        
+            <a href="/2016/05/13/mkdirs/" title="上一篇: nodejs递归创建多层目录">
+                <i class="fa fa-angle-left"></i>
+            </a>
+        
+        <a title="文章列表"><i class="fa fa-bars"></i><i class="fa fa-times"></i></a>
+        
+            <a href="/2016/01/28/setTimeout/" title="下一篇: setTimeout详解">
+                <i class="fa fa-angle-right"></i>
+            </a>
+        
+    </div>
+    <ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/09/15/express-koa-hapi/">［译］Node.js 框架比较( Express vs. Koa vs. Hapi )</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/09/01/Hexo-error-DTraceProviderBindings/">一个讨厌的Hexo报错(MODULE_NOT_FOUND)</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/22/careerAdvice1/">【转载】七个对我最重要的职业建议（译文）</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/20/jsCode/">js字符编码函数区别分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/16/tree-tranverse/">js二叉树遍历</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/13/mkdirs/">nodejs递归创建多层目录</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/02/02/zepto-tap/">zepto的tap事件点透分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/28/setTimeout/">setTimeout详解</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/13/HTMLbase/">HTML结构零散</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/01/10/NodeJsWeb/">Node.js实战 建立简单的Web服务器</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/28/inherit/">JS实现继承的几种方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-plug/">Hexo插件安装</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo-Theme/">Hexo 主题：SPFK</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/Hexo/">Hexo的使用介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/27/HexoBug/">Hexo bug</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/25/WeixinC/">微信Web开发工具</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/12/24/markdown/">Markdown使用指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/28/MobileRotate/">移动端横屏提示动画</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/08/02/Gulp/">Gulp前端自动化</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/04/25/WebFront/">web前端职业规划</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/04/20/GitHub+Hexo/">使用GitHub搭建Hexo博客</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/04/12/JSTip/">原生JS TitleTip</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/04/10/Git/">Git的使用技巧</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/04/02/OmniMarkupPreviewer/">OmniMarkupPreviewer</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/03/28/Mobile-knowledge/">移动前端知识总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/03/02/TextShow/">BOOS信息展示与收缩</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/25/media/">响应式布局</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/02/20/animation/">CSS3动画探秘</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/16/FrontEndGuide/">前端资源导航</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/01/16/Front-map/">【转】2014-2015前端知识体系</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/27/Moblie-PC/">关于移动端界面在PC端显示的实现</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/26/win7Set/">电脑优化相关</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/11/BusyFront/">Busy前端工作室</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/12/02/WebFrontRule/">Web前端开发规范手册</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/10/10/JQueryCDN/">CDN公共库</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/08/15/Native-JS/">原生JavaScript探索</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/08/02/InputSearch/">Input输入框的案例</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/07/21/Sublimebest/">Sublime Text历练</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/07/21/SublimePackage/">Sublime插件</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/06/02/HtmlRem/">Js-Rem的理解</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/20/ChromePlug/">前端Chrome插件</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/01/27/Ajax/">Ajax学习计划</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/01/20/careerAdvice/">前端Chrome插件</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/01/19/AjaxStatus/">Ajax Status请求状态</a></li><li class="post-list-item"><a class="post-list-link" href="/2013/08/27/OOCSS/">面向对象的CSS样式</a></li><li class="post-list-item"><a class="post-list-link" href="/2012/02/25/CssTips/">CSS小技巧收藏</a></li><li class="post-list-item"><a class="post-list-link" href="/2012/01/25/CSS/">CSS学习计划</a></li></ul>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script>
+        $(".post-list").addClass("toc-article");
+        $(".post-list-item a").attr("target","_blank");
+        $("#post-nav-button > a:nth-child(2)").click(function() {
+            $(".fa-bars, .fa-times").toggle();
+            $(".post-list").toggle(300);
+            if ($(".toc").length > 0) {
+                $("#toc, #tocButton").toggle(200, function() {
+                    if ($(".switch-area").is(":visible")) {
+                        $("#tocButton").attr("value", valueHide);
+                        }
+                    })
+            }
+            else {
+            }
+        })
+    </script>
+
+
+
+    <script>
+        
+    </script>
+</div>
+      <footer id="footer">
+    <div class="outer">
+        <div id="footer-info">
+            <div class="footer-left">
+                &copy; 2017 leaf
+            </div>
+            <div class="footer-right">
+                <a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/smile-leaf-language/hexo-theme-spfk" target="_blank">spfk</a> by yujuan
+            </div>
+        </div>
+        
+            <div class="visit">
+                
+                    <span id="busuanzi_container_site_pv" style='display:none'>
+                        <span id="site-visit" >海贼到访数: 
+                            <span id="busuanzi_value_site_uv"></span>
+                        </span>
+                    </span>
+                
+                
+                    <span>, </span>
+                
+                
+                    <span id="busuanzi_container_page_pv" style='display:none'>
+                        <span id="page-visit">本页阅读量: 
+                            <span id="busuanzi_value_page_pv"></span>
+                        </span>
+                    </span>
+                
+            </div>
+        
+    </div>
+</footer>
+
+    </div>
+    <script src="http://7.url.cn/edu/jslib/comb/require-2.1.6,jquery-1.9.1.min.js"></script>
+    <script src="/js/main.js"></script>
+        
+    <script>
+        $(document).ready(function() {
+            var backgroundnum = 24;
+            var backgroundimg = "url(/background/bg-x.jpg)".replace(/x/gi, Math.ceil(Math.random() * backgroundnum));
+            $("#mobile-nav").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+            $(".left-col").css({"background-image": backgroundimg,"background-size": "cover","background-position": "center"});
+        })
+    </script>
+
+            
+
+                
+                    
+                                <div class="scroll" id="scroll">
+    <a href="#"><i class="fa fa-arrow-up"></i></a>
+    <a href="#comments"><i class="fa fa-comments-o"></i></a>
+    <a href="#footer"><i class="fa fa-arrow-down"></i></a>
+</div>
+<script>
+    $(document).ready(function() {
+        if ($("#comments").length < 1) {
+            $("#scroll > a:nth-child(2)").hide();
+        };
+    })
+</script>
+                                    
+                                        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+                                        </script>
+                                        
+                                            <script language="javascript">
+    $(function() {
+        $("a[title]").each(function() {
+            var a = $(this);
+            var title = a.attr('title');
+            if (title == undefined || title == "") return;
+            a.data('title', title).removeAttr('title').hover(
+
+            function() {
+                var offset = a.offset();
+                $("<div id=\"anchortitlecontainer\"></div>").appendTo($("body")).html(title).css({
+                    top: offset.top - a.outerHeight() - 15,
+                    left: offset.left + a.outerWidth()/2 + 1
+                }).fadeIn(function() {
+                    var pop = $(this);
+                    setTimeout(function() {
+                        pop.remove();
+                    }, pop.text().length * 800);
+                });
+            }, function() {
+                $("#anchortitlecontainer").remove();
+            });
+        });
+    });
+</script>
+                                                
+                                                    
+                                                        <script type="text/javascript">
+                                                            window.onload = function() {
+                                                                document.getElementById("search").onclick = function() {
+                                                                    console.log("search")
+                                                                    search();
+                                                                }
+                                                            }
+
+                                                            function search() {
+                                                                (function(w, d, t, u, n, s, e) {
+                                                                    w['SwiftypeObject'] = n;
+                                                                    w[n] = w[n] || function() {
+                                                                        (w[n].q = w[n].q || []).push(arguments);
+                                                                    };
+                                                                    s = d.createElement(t);
+                                                                    e = d.getElementsByTagName(t)[0];
+                                                                    s.async = 1;
+                                                                    s.src = u;
+                                                                    e.parentNode.insertBefore(s, e);
+                                                                })(window, document, 'script', '//s.swiftypecdn.com/install/v2/st.js', '_st');
+
+                                                                _st('install', 'Ugqh7FRgqNrNtujC5k4E', '2.0.0');
+
+                                                            }
+                                                        </script>
+                                                        
+
+  </div>
+</body>
+</html>
